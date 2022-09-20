@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+
+  damn_backend:
+    build: ./backend
+    env_file: ./.env
+    environment:
+      - MONGO_HOST=mongodb
+      - MONGO_USER=${DB_USERNAME}
+      - MONGO_PSWD=${DB_PASSWORD}
+      - MONGO_PORT=${DB_PORT}
+      - MONGO_DTBS=${DATABASE}
+      - NODE_ENV=${ENVIRONMENT}
+      - BACKEND_PORT=${BACKEND_PORT}
+    # volumes:
+    #   - ./backend/src:/app/damn_backend/src
+    ports:
+      - ${BACKEND_PORT}:${BACKEND_PORT}
+    command: sh -c 'if [ ${ENVIRONMENT} = "production" ]; then
+                        npm run start:prod;
+                    else
+                        npm run start:dev;
+                    fi'   
+
+  damn_frontend:
+    build: ./frontend
+    env_file: ./.env
+    # volumes:
+    #   - /frontend/src:/app/damn_frontend/src
+    ports:
+      - ${FRONTEND_PORT}:${FRONTEND_PORT}
+    command: sh -c 'if [ ${ENVIRONMENT} = "production" ]; then
+                        ng serve;
+                    else
+                        ng serve --host 0.0.0.0 --port ${FRONTEND_PORT} --disable-host-check;
+                    fi' 
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    env_file: ./.env
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${DB_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
+      - MONGO_INITDB_DATABASE=${DATABASE}
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+    volumes:
+      - ./backend/scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - damn_volume:/data/db
+    
+volumes:
+  damn_volume:

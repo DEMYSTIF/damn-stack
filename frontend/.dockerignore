@@ -1,0 +1,13 @@
+**/.angular
+**/.git
+**/.vs
+**/.vscode
+**/node_modules
+**/npm-debug.log
+.dockerignore
+.editorconfig
+.env
+.gitignore
+Dockerfile
+README.md
+package-lock.json
